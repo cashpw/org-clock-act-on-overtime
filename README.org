@@ -1,5 +1,5 @@
 :PROPERTIES:
-:LAST_MODIFIED: [2025-05-01 Thu 10:13]
+:LAST_MODIFIED: [2025-05-01 Thu 10:23]
 :END:
 #+title: org-clock-act-on-overtime
 
@@ -32,7 +32,8 @@ You can wrap with a variable check to act only once:
 (defun casphw/notify-overtime ()
   "Notify that the current task is overtime."
   (unless my/notify-overtime--have-notified
-    (message "I show up only once!")))
+    (message "I show up only once!")
+    (setq my/notify-overtime--have-notified t)))
 
 (defun casphw/notify-overtime--reset ()
   "Reset overtime notifier so we can notify again."

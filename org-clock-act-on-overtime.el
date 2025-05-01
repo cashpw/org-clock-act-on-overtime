@@ -125,7 +125,7 @@ Reference: https://emacs.stackexchange.com/a/79590"
 
 (defun org-clock-act-on-overtime--act ()
   "Invoke overtime functions if we're overtime."
-  (dolist (fn org-clock-act-on-overtime-fns)
+  (dolist (fn org-clock-act-on-overtime-hook)
     (funcall fn)))
 
 

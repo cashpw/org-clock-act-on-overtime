@@ -24,7 +24,7 @@
   :tag "Org-clock act on overtime"
   :group 'org)
 
-(defcustom org-clock-act-on-overtime-fns '()
+(defcustom org-clock-act-on-overtime-hook '()
   "List of functions to invoke when org-clock time exceeds the planned duration."
   :type '(repeat function)
   :group 'org-clock-act-on-overtime)

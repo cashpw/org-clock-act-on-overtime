@@ -1,5 +1,5 @@
 :PROPERTIES:
-:LAST_MODIFIED: [2025-05-01 Thu 10:03]
+:LAST_MODIFIED: [2025-05-01 Thu 10:13]
 :END:
 #+title: org-clock-act-on-overtime
 
@@ -12,11 +12,33 @@ Overtime is based:
 
 * Usage
 
+Hooks are invoked *every minute* while the current org-clock is overtime:
+
 #+begin_src emacs-lisp
 (defun my/notify-overtime ()
   "Let me know when I'm over my planned clock time."
-  (message "Overtime!"))
+  (message "I show up every minute the current clock is overtime!"))
 
-(add-to-list 'org-clock-act-on-overtime-fns #'my/notify-overtime)
+(add-to-list 'org-clock-act-on-overtime-hook #'my/notify-overtime)
+(org-clock-act-on-overtime-mode 'enable)
+#+end_src
+
+You can wrap with a variable check to act only once:
+
+#+begin_src emacs-lisp
+(defvar my/notify-overtime--have-notified nil
+  "Non-nil if we've already notified for the current overtime clock.")
+
+(defun casphw/notify-overtime ()
+  "Notify that the current task is overtime."
+  (unless my/notify-overtime--have-notified
+    (message "I show up only once!")))
+
+(defun casphw/notify-overtime--reset ()
+  "Reset overtime notifier so we can notify again."
+  (setq my/notify-overtime--have-notified nil))
+
+(add-to-list 'org-clock-act-on-overtime-hook #'my/notify-overtime)
+(add-to-list 'org-clock-out-hook #'my/notify-overtime--reset)
 (org-clock-act-on-overtime-mode 'enable)
 #+end_src

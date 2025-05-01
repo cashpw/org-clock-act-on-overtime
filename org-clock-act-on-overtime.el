@@ -29,11 +29,13 @@
   :type '(repeat function)
   :group 'org-clock-act-on-overtime)
 
-(defun org-clock-act-on-overtime--timestamp-range-duration-in-minutes (timestamp)
+(defun org-clock-act-on-overtime--timestamp-range-duration-in-minutes
+    (timestamp)
   "Return TIMESTAMP range in minutes.
 
 Reference: https://emacs.stackexchange.com/a/79590"
-  (if (member (org-element-property :type timestamp) '(active-range inactive-range))
+  (if (member
+       (org-element-property :type timestamp) '(active-range inactive-range))
       (/ (time-subtract
           (org-timestamp-to-time ts 'end) (org-timestamp-to-time ts))
          60)
@@ -73,8 +75,10 @@ Reference: https://emacs.stackexchange.com/a/79590"
   "Install timer to run at every minute at XX:XX:01."
   (setq org-clock-act-on-overtime--timer
         (run-at-time
+         ;; Next minute at XX:XX:01 seconds.
          (time-add
-          nil (1+ (org-clock-act-on-overtime--time-seconds (current-time))))
+          (current-time)
+          (1+ (- 60 (org-clock-act-on-overtime--time-seconds (current-time)))))
          'repeat #'org-clock-act-on-overtime--maybe-act)))
 
 (defun org-clock-act-on-overtime--uninstall-timer ()
@@ -101,20 +105,23 @@ Reference: https://emacs.stackexchange.com/a/79590"
 
 (defun org-clock-act-on-overtime-mode--enable ()
   "Enable act-on-overtime functionality."
-  (org-clock-act-on-overtime--install-timer))
+  (add-hook 'org-clock-out-hook #'org-clock-act-on-overtime--uninstall-timer)
+  (add-hook 'org-clock-in-hook #'org-clock-act-on-overtime--install-timer))
 
 (defun org-clock-act-on-overtime-mode--disable ()
   "Disable act-on-overtime functionality."
-  (org-clock-act-on-overtime--uninstall-timer))
+  (remove-hook 'org-clock-out-hook #'org-clock-act-on-overtime--uninstall-timer)
+  (remove-hook 'org-clock-in-hook #'org-clock-act-on-overtime--install-timer))
 
 (defun org-clock-act-on-overtime--overtime-p ()
   "Return non-nil if org-clock is overtime."
-  (when-let* ((clocked-time-in-minutes (org-clock-get-clocked-time))
-              (planned-duration-in-minutes
-               (org-with-point-at
-                   org-clock-hd-marker
-                 (or (org-clock-act-on-overtime--scheduled-duration-minutes-at-point)
-                     (org-clock-act-on-overtime--effort-minutes-at-point)))))
+  (when-let*
+      ((clocked-time-in-minutes (org-clock-get-clocked-time))
+       (planned-duration-in-minutes
+        (org-with-point-at
+            org-clock-hd-marker
+          (or (org-clock-act-on-overtime--scheduled-duration-minutes-at-point)
+              (org-clock-act-on-overtime--effort-minutes-at-point)))))
     (< planned-duration-in-minutes clocked-time-in-minutes)))
 
 (defun org-clock-act-on-overtime--maybe-act ()
